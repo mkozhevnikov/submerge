@@ -27,6 +27,18 @@ class Program
         foreach (var commitInfo in ReadCommits()) {
             Console.WriteLine(commitInfo.Message);
         }
+        Console.WriteLine();
+
+        Console.WriteLine($"The head branch is '{head}'");
+        if (!TrySwitchBranch(head)) {
+            Console.WriteLine("Switching branch was not successfull");
+            return;
+        }
+
+        foreach (var commitInfo in ReadCommits()) {
+            Console.WriteLine(commitInfo.Message);
+        }
+        Console.WriteLine();
     }
 
     const string gitCmd = "git";
