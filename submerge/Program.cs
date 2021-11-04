@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 
@@ -27,6 +28,16 @@ class Program
             outputLine = reader.ReadLine();
             if (outputLine == null) break;
         } while (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already"));
+
+        const string logCmd = "log --oneline";
+        RunProcess(gitCmd, $"{logCmd} .", out reader);
+
+        var commitLog = new List<(string, string)>();
+        while ((outputLine = reader.ReadLine()) is not null) {
+            var commitInfo = outputLine.Split(" ", 2);
+            commitLog.Add((commitInfo[0], commitInfo[1]));
+            Console.WriteLine(commitInfo[1]);
+        }
     }
 
     public static void RunProcess(string cmd, string arg, out StreamReader reader)
