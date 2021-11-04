@@ -7,11 +7,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        if (args.Length == 0)
-        {
-            Console.WriteLine("Some arguments are expected");
-        }
-
         var command = ArgsParser.CreateCommand(args);
         command.Handler = CommandHandler.Create<string, string, string>(PrintParsedParams);
 

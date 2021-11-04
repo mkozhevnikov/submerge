@@ -7,16 +7,22 @@ public class ArgsParser
         var rootCmd = new RootCommand(
             "Creates a branch based on difference between base and head for a directory"
         );
-        rootCmd.Add(new Option<string>(
-            new []{ "-b", "--base" },
+
+        Option<string> NewOption(string[] aliases, string description, bool isRequired = true) =>
+            new Option<string>(aliases, description) {
+                IsRequired = isRequired
+            };
+        
+        rootCmd.Add(NewOption(
+            new[] { "-b", "--base" },
             "base branch for which a new branch will be created"
         ));
-        rootCmd.Add(new Option<string>(
-            new []{ "-h", "--head" },
+        rootCmd.Add(NewOption(
+            new[] { "-h", "--head" },
             "branch which will be compared with a base branch"
         ));
-        rootCmd.Add(new Option<string>(
-            new []{ "-n", "--name" },
+        rootCmd.Add(NewOption(
+            new[] { "-n", "--name" },
             "name of the result branch"
         ));
         return rootCmd;
