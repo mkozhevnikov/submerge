@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -18,35 +19,39 @@ class Program
 
     public static void PrintParsedParams(string @base, string head, string name)
     {
-        Console.WriteLine($"The base branch is '{@base}'");
-        if (!TrySwitchBranch(@base)) {
-            Console.WriteLine("Switching branch was not successfull");
-            return;
-        }
-
-        foreach (var commitInfo in ReadCommits()) {
-            Console.WriteLine(commitInfo.Message);
-        }
-        Console.WriteLine();
-
         Console.WriteLine($"The head branch is '{head}'");
         if (!TrySwitchBranch(head)) {
             Console.WriteLine("Switching branch was not successfull");
             return;
         }
 
-        foreach (var commitInfo in ReadCommits()) {
-            Console.WriteLine(commitInfo.Message);
+        var headCommits = ReadCommits();
+
+        Console.WriteLine($"The base branch is '{@base}'");
+        if (!TrySwitchBranch(@base)) {
+            Console.WriteLine("Switching branch was not successfull");
+            return;
         }
-        Console.WriteLine();
+
+        var baseCommits = ReadCommits().Select(c => c.Hash).ToHashSet();
+
+        Console.WriteLine($"The result branch is '{name}'");
+        if (!TrySwitchBranch(name, checkoutCmd + " -b")) {
+            Console.WriteLine("Switching branch was not successfull");
+            return;
+        }
+
+        foreach (var commit in headCommits.Reverse().Where(ch => !baseCommits.Contains(ch.Hash))) {
+            CherryPick(commit.Hash);
+        }
     }
 
     const string gitCmd = "git";
     const string checkoutCmd = "checkout";
 
-    public static bool TrySwitchBranch(string branch)
+    public static bool TrySwitchBranch(string branch, string checkoutCommand = checkoutCmd)
     {
-        return RunProcess(gitCmd, $"{checkoutCmd} {branch}", out var _);
+        return RunProcess(gitCmd, $"{checkoutCommand} {branch}", out var _);
     }
 
     const string logCmd = "log --oneline";
@@ -60,6 +65,12 @@ class Program
             var commitInfo = outputLine.Split(" ", 2);
             yield return (commitInfo[0], commitInfo[1]);
         }
+    }
+
+    const string cherryPickCmd = "cherry-pick";
+    public static bool CherryPick(string commitHash)
+    {
+        return RunProcess(gitCmd, $"{cherryPickCmd} {commitHash}", out var _);
     }
 
     public static bool RunProcess(string cmd, string arg, out TextReader reader) 
