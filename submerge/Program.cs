@@ -36,9 +36,11 @@ class Program
         var baseCommits = ReadCommits().Select(c => c.Hash).ToHashSet();
 
         Console.WriteLine($"The result branch is '{name}'");
-        if (!TrySwitchBranch(name, checkoutCmd + " -b")) {
-            Console.WriteLine("Switching branch was not successfull");
-            return;
+        if (!TrySwitchBranch(name)) {
+            if (!TrySwitchBranch(name, checkoutCmd + " -b")) {
+                Console.WriteLine("Switching branch was not successfull");
+                return;
+            }
         }
 
         foreach (var commit in headCommits.Reverse().Where(ch => !baseCommits.Contains(ch.Hash))) {
