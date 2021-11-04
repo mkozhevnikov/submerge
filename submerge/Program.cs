@@ -36,21 +36,22 @@ class Program
         var baseCommits = ReadCommits().Select(c => c.Hash).ToHashSet();
 
         Console.WriteLine($"The result branch is '{name}'");
-        if (!TrySwitchBranch(name)) {
-            if (!TrySwitchBranch(name, checkoutCmd + " -b")) {
-                Console.WriteLine("Switching branch was not successfull");
-                return;
-            }
+        if (!TrySwitchBranch(name) && !TrySwitchBranch(name, checkoutCmd + " -b")) {
+            Console.WriteLine("Switching branch was not successfull");
+            return;
         }
 
-        for (var i = headCommits.Count - 1; i >= 0; i++) {
+        Console.WriteLine($"head branch has {headCommits.Count} commits total");
+        Console.WriteLine($"base branch has {baseCommits.Count} commits total");
+        for (var i = headCommits.Count - 1; i >= 0; i--) {
             var commit = headCommits[i];
-            if (!baseCommits.Contains(commit.Hash)) {
-                Console.WriteLine("Cherry-picking commit: " + commit.Message);
-                CherryPick(commit.Hash);
+            Console.WriteLine(commit.Hash);
+            if (baseCommits.Contains(commit.Hash)) {
+                continue;
             }
             else {
-                break;
+                Console.WriteLine("Cherry-picking commit: " + commit.Message);
+                CherryPick(commit.Hash);
             }
         }
     }
