@@ -25,7 +25,7 @@ class Program
             return;
         }
 
-        var headCommits = ReadCommits();
+        var headCommits = ReadCommits().ToList();
 
         Console.WriteLine($"The base branch is '{@base}'");
         if (!TrySwitchBranch(@base)) {
@@ -43,8 +43,15 @@ class Program
             }
         }
 
-        foreach (var commit in headCommits.Reverse().Where(ch => !baseCommits.Contains(ch.Hash))) {
-            CherryPick(commit.Hash);
+        for (var i = headCommits.Count - 1; i >= 0; i++) {
+            var commit = headCommits[i];
+            if (!baseCommits.Contains(commit.Hash)) {
+                Console.WriteLine("Cherry-picking commit: " + commit.Message);
+                CherryPick(commit.Hash);
+            }
+            else {
+                break;
+            }
         }
     }
 
