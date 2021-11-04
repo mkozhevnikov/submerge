@@ -25,6 +25,7 @@ class Program
         string outputLine;
         do {
             outputLine = reader.ReadLine();
+            if (outputLine == null) break;
         } while (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already"));
     }
 
