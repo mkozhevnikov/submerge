@@ -34,17 +34,7 @@ class Program
 
     public static bool TrySwitchBranch(string branch)
     {
-        RunProcess(gitCmd, $"{checkoutCmd} {branch}", out var reader);
-
-        string outputLine;
-        while ((outputLine = reader.ReadLine()) is not null) {
-            if (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already")) {
-                Console.WriteLine("Have found keyword");
-                return true;
-            }
-        }
-
-        return false;
+        return RunProcess(gitCmd, $"{checkoutCmd} {branch}", out var _);
     }
 
     const string logCmd = "log --oneline";
