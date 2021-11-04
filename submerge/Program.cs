@@ -24,10 +24,18 @@ class Program
         RunProcess(gitCmd, $"{checkoutCmd} {@base}", out var reader);
 
         string outputLine;
-        do {
-            outputLine = reader.ReadLine();
-            if (outputLine == null) break;
-        } while (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already"));
+        bool hasSwitched = false;
+        while ((outputLine = reader.ReadLine()) is not null) {
+            if (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already")) {
+                hasSwitched = true;
+                break;
+            }
+        }
+
+        if (!hasSwitched) {
+            Console.WriteLine("Switching branch was not successfull");
+            return;
+        }
 
         const string logCmd = "log --oneline";
         RunProcess(gitCmd, $"{logCmd} .", out reader);
