@@ -48,15 +48,26 @@ class Program
         }
     }
 
-    public static void RunProcess(string cmd, string arg, out StreamReader reader)
+    public static bool RunProcess(string cmd, string arg, out TextReader reader) 
     {
         using var process = new Process();
         process.StartInfo.FileName = cmd;
         process.StartInfo.Arguments = arg;
+        process.StartInfo.UseShellExecute = false;
         process.StartInfo.RedirectStandardOutput = true;
-        process.Start();
+        process.StartInfo.RedirectStandardError = true;
 
-        reader = process.StandardOutput;
+        process.ErrorDataReceived += new DataReceivedEventHandler(
+            (sender, e) => Console.WriteLine(e.Data));
+
+        process.Start();
+        process.BeginErrorReadLine();
+        var stdout = process.StandardOutput.ReadToEnd();
         process.WaitForExit();
+
+        Console.WriteLine(stdout);
+        reader = new StringReader(stdout);
+
+        return process.ExitCode == 0;
     }
 }
