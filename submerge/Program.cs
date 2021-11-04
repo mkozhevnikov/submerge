@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -15,8 +17,26 @@ class Program
 
     public static void PrintParsedParams(string @base, string head, string name)
     {
-        Console.WriteLine($"The base param is {@base}");
-        Console.WriteLine($"The head param is {head}");
-        Console.WriteLine($"The name param is {name}");
+        Console.WriteLine($"The base branch is '{@base}'");
+        const string gitCmd = "git";
+        const string checkoutCmd = "checkout";
+        RunProcess(gitCmd, $"{checkoutCmd} {@base}", out var reader);
+
+        string outputLine;
+        do {
+            outputLine = reader.ReadLine();
+        } while (outputLine.StartsWith("Switched") || outputLine.StartsWith("Already"));
+    }
+
+    public static void RunProcess(string cmd, string arg, out StreamReader reader)
+    {
+        using var process = new Process();
+        process.StartInfo.FileName = cmd;
+        process.StartInfo.Arguments = arg;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.Start();
+
+        reader = process.StandardOutput;
+        process.WaitForExit();
     }
 }
