@@ -51,7 +51,9 @@ class Program
             }
             else {
                 Console.WriteLine("Cherry-picking commit: " + commit.Message);
-                CherryPick(commit.Hash);
+                if (!TryCherryPick(commit.Hash)) {
+                    break;
+                }
             }
         }
     }
@@ -78,7 +80,7 @@ class Program
     }
 
     const string cherryPickCmd = "cherry-pick";
-    public static bool CherryPick(string commitHash)
+    public static bool TryCherryPick(string commitHash)
     {
         return RunProcess(gitCmd, $"{cherryPickCmd} {commitHash}", out var _);
     }
